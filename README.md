@@ -1127,10 +1127,10 @@ If you're new here, please take a moment to review our contributing guidelines b
 [npm-url]: https://npmjs.com/package/postcss-loader
 [node]: https://img.shields.io/node/v/postcss-loader.svg
 [node-url]: https://nodejs.org
-[tests]: https://github.com/webpack-contrib/postcss-loader/workflows/postcss-loader/badge.svg
-[tests-url]: https://github.com/webpack-contrib/postcss-loader/actions
-[cover]: https://codecov.io/gh/webpack-contrib/postcss-loader/branch/master/graph/badge.svg
-[cover-url]: https://codecov.io/gh/webpack-contrib/postcss-loader
+[tests]: https://github.com/webpack/postcss-loader/workflows/postcss-loader/badge.svg
+[tests-url]: https://github.com/webpack/postcss-loader/actions
+[cover]: https://codecov.io/gh/webpack/postcss-loader/branch/main/graph/badge.svg
+[cover-url]: https://codecov.io/gh/webpack/postcss-loader
 [discussion]: https://img.shields.io/github/discussions/webpack/webpack
 [discussion-url]: https://github.com/webpack/webpack/discussions
 [chat-postcss]: https://badges.gitter.im/postcss/postcss.svg
