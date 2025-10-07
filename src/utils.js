@@ -414,7 +414,7 @@ async function getPostcssOptions(
   }
 
   if (processOptions.map === true) {
-    // https://github.com/postcss/postcss/blob/master/docs/source-maps.md
+    // https://github.com/postcss/postcss/blob/main/docs/source-maps.md
     processOptions.map = { inline: true };
   }
 
