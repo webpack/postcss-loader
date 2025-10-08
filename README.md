@@ -830,7 +830,7 @@ module.exports = {
 
 ### CSS Modules
 
-> What are `CSS Modules`? Please [read here](https://github.com/webpack-contrib/css-loader#modules).
+> What are `CSS Modules`? Please [read here](https://github.com/webpack/css-loader#modules).
 
 No additional options required on the `postcss-loader` side to support CSS Modules.
 To make them work properly, either add the `css-loader`’s `importLoaders` option.
@@ -914,7 +914,7 @@ export default {
 
 ### Extract CSS
 
-To extract CSS into separate files, use [`mini-css-extract-plugin`](https://github.com/webpack-contrib/mini-css-extract-plugin).
+To extract CSS into separate files, use [`mini-css-extract-plugin`](https://github.com/webpack/mini-css-extract-plugin).
 
 **webpack.config.js**
 
