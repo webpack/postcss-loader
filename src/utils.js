@@ -208,6 +208,7 @@ function loadPlugin(plugin, options, file) {
   } catch (error) {
     throw new Error(
       `Loading PostCSS "${plugin}" plugin failed: ${error.message}\n\n(@${file})`,
+      { cause: error },
     );
   }
 }
