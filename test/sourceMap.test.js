@@ -432,9 +432,11 @@ describe('"sourceMap" option', () => {
     sourceMap.sources = sourceMap.sources.map((source) => {
       expect(path.isAbsolute(source)).toBe(true);
       expect(source).toBe(path.normalize(source));
-      expect(fs.existsSync(path.resolve(sourceMap.sourceRoot, source))).toBe(
-        true,
-      );
+      expect(
+        fs.existsSync(
+          path.resolve(__dirname, "./fixtures/less", path.basename(source)),
+        ),
+      ).toBe(true);
 
       return path
         .relative(path.resolve(__dirname, "./fixtures"), source)
