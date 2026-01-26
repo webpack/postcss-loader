@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`"postcssOptions" option should throw an error with "syntax" option on the unresolved syntax: errors 1`] = `
 [
@@ -500,7 +500,7 @@ exports[`"postcssOptions" option should work with the "config" options with "Str
   color: black
 }
 
-/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0eWxlLnNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFO0FBREYiLCJmaWxlIjoic3R5bGUuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiYVxuICBjb2xvcjogYmxhY2tcbiJdfQ== */"
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0eWxlLnNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFO0FBREQiLCJmaWxlIjoic3R5bGUuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiYVxuICBjb2xvcjogYmxhY2tcbiJdfQ== */"
 `;
 
 exports[`"postcssOptions" option should work with the "config" options with "String" value and respect all options: errors 1`] = `[]`;

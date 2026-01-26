@@ -162,7 +162,7 @@ exports[`"sourceMap" option should generate source maps when previous loader ret
 "a {
   color: coral;
 }
-"
+/*# sourceMappingURL=style.css.map */"
 `;
 
 exports[`"sourceMap" option should generate source maps when previous loader returns source maps ("less-loader"): errors 1`] = `[]`;
@@ -173,12 +173,10 @@ exports[`"sourceMap" option should generate source maps when previous loader ret
   "names": [],
   "sourceRoot": "",
   "sources": [
-    "less/style.less",
+    "../../style.less",
   ],
   "sourcesContent": [
-    "a {
-  color: coral;
-}
+    "a { color: coral }
 ",
   ],
   "version": 3,
