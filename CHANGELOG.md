@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [8.2.1](https://github.com/webpack/postcss-loader/compare/v8.2.0...v8.2.1) (2026-02-15)
+
+
+### Bug Fixes
+
+* update peer dependency for @rspack/core v2 ([#717](https://github.com/webpack/postcss-loader/issues/717)) ([a3ed7e2](https://github.com/webpack/postcss-loader/commit/a3ed7e236b6414efdb89084fb90861a16db84b6a))
+
 ## [8.2.0](https://github.com/webpack-contrib/postcss-loader/compare/v8.1.1...v8.2.0) (2025-09-01)
 
 
