@@ -1,0 +1,1 @@
+import "../sss/style.sss";

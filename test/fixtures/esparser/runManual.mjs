@@ -10,18 +10,22 @@ const compiler = webpack({
   devtool: false,
   context: path.resolve(rootDir, "../fixtures"),
   entry: path.resolve(rootDir, "../fixtures", "./sss/index.js"),
+  experiments: {
+    css: true,
+  },
   output: {
     path: path.resolve(rootDir, "../outputs"),
     filename: "[name].bundle.js",
     chunkFilename: "[name].chunk.js",
+    cssFilename: "[name].css",
     publicPath: "/webpack/public/path/",
   },
   module: {
     rules: [
       {
         test: /\.(css|sss)$/i,
+        type: "css/auto",
         use: [
-          'css-loader',
           {
             loader: path.resolve(rootDir, "../../dist"),
             options: {
