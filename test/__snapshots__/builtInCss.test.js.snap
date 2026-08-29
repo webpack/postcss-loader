@@ -1,0 +1,112 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`built-in CSS support of webpack should emit an error on invalid syntax: errors 1`] = `
+[
+  "ModuleBuildError: Module build failed (from \`replaced original path\`):
+
+SyntaxError
+
+(1:3) /test/fixtures/css/style.css Unnecessary curly bracket
+
+> 1 | a {
+    |   ^
+  2 |   color: black;
+  3 | }
+",
+]
+`;
+
+exports[`built-in CSS support of webpack should emit an error on invalid syntax: warnings 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should generate source maps: errors 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should generate source maps: warnings 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work with CSS modules: errors 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work with CSS modules: warnings 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work with SugarSS: css 1`] = `
+"/*!***************************!*\\
+  !*** css ./sss/style.sss ***!
+  \\***************************/
+a {
+  color: black
+}
+
+"
+`;
+
+exports[`built-in CSS support of webpack should work with SugarSS: errors 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work with SugarSS: warnings 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work with the "execute" option and CSS-in-JS: css 1`] = `
+"/*!*************************************!*\\
+  !*** css ./jss/postcss-js/style.js ***!
+  \\*************************************/
+a {
+    color: yellow
+}
+"
+`;
+
+exports[`built-in CSS support of webpack should work with the "execute" option and CSS-in-JS: errors 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work with the "execute" option and CSS-in-JS: warnings 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work: css 1`] = `
+"/*!***************************!*\\
+  !*** css ./css/style.css ***!
+  \\***************************/
+a {
+  color: black;
+}
+
+a {
+  color: red;
+}
+
+a {
+  color: green;
+}
+
+a {
+  color: blue;
+}
+
+.class {
+  -x-border-color: blue blue *;
+  -x-color: * #fafafa;
+}
+
+.class-foo {
+  -z-border-color: blue blue *;
+  -z-color: * #fafafa;
+}
+
+.phone_title {
+    width: 500px;
+  }
+
+@media (max-width: 500px) {
+
+.phone_title {
+      width: auto
+  }
+    }
+
+body.is_dark .phone_title {
+      color: white;
+    }
+
+.phone img {
+    display: block;
+  }
+
+"
+`;
+
+exports[`built-in CSS support of webpack should work: errors 1`] = `[]`;
+
+exports[`built-in CSS support of webpack should work: warnings 1`] = `[]`;

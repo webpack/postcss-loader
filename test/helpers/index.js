@@ -4,6 +4,7 @@ export { default as normalizeErrors } from "./normalizeErrors";
 export { default as execute } from "./execute";
 export { default as getCompiler } from "./getCompiler";
 export { default as getCodeFromBundle } from "./getCodeFromBundle";
+export { default as getCssCompiler } from "./getCssCompiler";
 export { default as getExecutedCode } from "./getExecutedCode";
 export { default as getErrors } from "./getErrors";
 export { default as readAsset } from "./readAsset";

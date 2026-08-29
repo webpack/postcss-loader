@@ -64,6 +64,9 @@ Then add the loader to your `webpack` configuration. For example:
 
 > In the following configuration the plugin [`postcss-preset-env`](https://github.com/csstools/postcss-preset-env) is used, which is not installed by default.
 
+> The examples below use the [built-in CSS support](https://webpack.js.org/configuration/experiments/#experimentscss) of webpack (available in webpack `>= 5.87.0`), so no `css-loader` and `style-loader` are required.
+> If you prefer to handle CSS using [`css-loader`](https://github.com/webpack/css-loader) and [`style-loader`](https://github.com/webpack/style-loader), keep them in the list of loaders and use `postcss-loader` **before** them.
+
 **file.js**
 
 ```js
@@ -74,13 +77,17 @@ import css from "file.css";
 
 ```js
 module.exports = {
+  experiments: {
+    // Enable the built-in CSS support of webpack
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
+        // `css/auto` treats `*.module.css` files as CSS modules and all other files as regular CSS
+        type: "css/auto",
         use: [
-          "style-loader",
-          "css-loader",
           {
             loader: "postcss-loader",
             options: {
@@ -126,11 +133,15 @@ The loader **automatically** searches for configuration files.
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader", "postcss-loader"],
+        type: "css/auto",
+        use: ["postcss-loader"],
       },
     ],
   },
@@ -163,13 +174,15 @@ If you use JS styles the [`postcss-js`](https://github.com/postcss/postcss-js) p
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.style.js$/,
+        type: "css/auto",
         use: [
-          "style-loader",
-          { loader: "css-loader" },
           {
             loader: "postcss-loader",
             options: {
@@ -513,23 +526,23 @@ Config lookup starts from `path.dirname(file)` and walks the file tree upwards u
 ```
 
 After setting up your `postcss.config.js`, add `postcss-loader` to your `webpack.config.js`.
-You can use it standalone or in conjunction with `css-loader` (recommended).
+You can use it standalone or in conjunction with the built-in CSS support of webpack (recommended).
 
-Use `postcss-loader` **before** `css-loader` and `style-loader`, but **after** other preprocessor loaders like e.g `sass|less|stylus-loader`, if you use any (since [webpack loaders evaluate right to left/bottom to top](https://webpack.js.org/concepts/loaders/#configuration)).
+Use `postcss-loader` **after** other preprocessor loaders like e.g `sass|less|stylus-loader`, if you use any (since [webpack loaders evaluate right to left/bottom to top](https://webpack.js.org/concepts/loaders/#configuration)).
 
 **webpack.config.js** (**recommended**)
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: [
-          "style-loader",
-          { loader: "css-loader", options: { importLoaders: 1 } },
-          "postcss-loader",
-        ],
+        type: "css/auto",
+        use: ["postcss-loader"],
       },
     ],
   },
@@ -599,13 +612,15 @@ All values enable source map generation except `eval` and `false` value.
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
-        test: /\.css$/i,
+        test: /\.s[ac]ss$/i,
+        type: "css/auto",
         use: [
-          { loader: "style-loader" },
-          { loader: "css-loader", options: { sourceMap: true } },
           { loader: "postcss-loader", options: { sourceMap: true } },
           { loader: "sass-loader", options: { sourceMap: true } },
         ],
@@ -622,16 +637,15 @@ Alternative setup:
 ```js
 module.exports = {
   devtool: "source-map",
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
-        test: /\.css$/i,
-        use: [
-          { loader: "style-loader" },
-          { loader: "css-loader" },
-          { loader: "postcss-loader" },
-          { loader: "sass-loader" },
-        ],
+        test: /\.s[ac]ss$/i,
+        type: "css/auto",
+        use: [{ loader: "postcss-loader" }, { loader: "sass-loader" }],
       },
     ],
   },
@@ -660,13 +674,15 @@ The special `implementation` option determines which implementation of PostCSS t
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
-        test: /\.css$/i,
+        test: /\.s[ac]ss$/i,
+        type: "css/auto",
         use: [
-          { loader: "style-loader" },
-          { loader: "css-loader" },
           {
             loader: "postcss-loader",
             options: { implementation: require("postcss") },
@@ -685,13 +701,15 @@ module.exports = {
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
-        test: /\.css$/i,
+        test: /\.s[ac]ss$/i,
+        type: "css/auto",
         use: [
-          { loader: "style-loader" },
-          { loader: "css-loader" },
           {
             loader: "postcss-loader",
             options: { implementation: require.resolve("postcss") },
@@ -722,13 +740,15 @@ Using [`SugarSS`](https://github.com/postcss/sugarss) syntax.
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.sss$/i,
+        type: "css/auto",
         use: [
-          "style-loader",
-          { loader: "css-loader", options: { importLoaders: 1 } },
           {
             loader: "postcss-loader",
             options: { postcssOptions: { parser: "sugarss" } },
@@ -754,13 +774,15 @@ Automatically add vendor prefixes to CSS rules using [`autoprefixer`](https://gi
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
+        type: "css/auto",
         use: [
-          "style-loader",
-          { loader: "css-loader", options: { importLoaders: 1 } },
           {
             loader: "postcss-loader",
             options: {
@@ -799,13 +821,15 @@ npm install --save-dev postcss-preset-env
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
+        type: "css/auto",
         use: [
-          "style-loader",
-          { loader: "css-loader", options: { importLoaders: 1 } },
           {
             loader: "postcss-loader",
             options: {
@@ -830,27 +854,45 @@ module.exports = {
 
 ### CSS Modules
 
-> What are `CSS Modules`? Please [read here](https://github.com/webpack/css-loader#modules).
+> What are `CSS Modules`? Please [read here](https://github.com/css-modules/css-modules).
 
 No additional options required on the `postcss-loader` side to support CSS Modules.
-To make them work properly, either add the `css-loader`’s `importLoaders` option.
+With the built-in CSS support of webpack use the `css/auto` module type - all `*.module.css` files are treated as CSS modules, other files are treated as regular CSS.
 
 **webpack.config.js**
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: { modules: true, importLoaders: 1 },
-          },
-          "postcss-loader",
-        ],
+        type: "css/auto",
+        use: ["postcss-loader"],
+      },
+    ],
+  },
+};
+```
+
+Use the `css/module` module type to treat **all** matched files as CSS modules, regardless of their name.
+
+**webpack.config.js**
+
+```js
+module.exports = {
+  experiments: {
+    css: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        type: "css/module",
+        use: ["postcss-loader"],
       },
     ],
   },
@@ -873,13 +915,15 @@ If you want to process styles written in JavaScript, use the [`postcss-js`](http
 
 ```js
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.style.js$/,
+        type: "css/auto",
         use: [
-          "style-loader",
-          { loader: "css-loader", options: { importLoaders: 2 } },
           {
             loader: "postcss-loader",
             options: {
@@ -914,38 +958,35 @@ export default {
 
 ### Extract CSS
 
-To extract CSS into separate files, use [`mini-css-extract-plugin`](https://github.com/webpack/mini-css-extract-plugin).
+The built-in CSS support of webpack extracts CSS into separate files out of the box, no plugin is required.
+Use [`output.cssFilename`](https://webpack.js.org/configuration/output/#outputcssfilename) and [`output.cssChunkFilename`](https://webpack.js.org/configuration/output/#outputcsschunkfilename) to control the names of the generated files.
 
 **webpack.config.js**
 
 ```js
 const isProductionMode = process.env.NODE_ENV === "production";
 
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-
 module.exports = {
   mode: isProductionMode ? "production" : "development",
+  experiments: {
+    css: true,
+  },
+  output: {
+    cssFilename: isProductionMode ? "[name].[contenthash].css" : "[name].css",
+  },
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: [
-          isProductionMode ? MiniCssExtractPlugin.loader : "style-loader",
-          "css-loader",
-          "postcss-loader",
-        ],
+        type: "css/auto",
+        use: ["postcss-loader"],
       },
     ],
   },
-  plugins: [
-    new MiniCssExtractPlugin({
-      filename: isProductionMode ? "[name].[contenthash].css" : "[name].css",
-    }),
-  ],
 };
 ```
 
-> 💡 Use this setup to extract and cache CSS in production while keeping fast style injection during development.
+> 💡 Use this setup to extract and cache CSS in production while keeping fast rebuilds during development.
 
 ### Emit assets
 
@@ -974,13 +1015,15 @@ const postcssCustomPlugin = (opts = {}) => ({
 });
 
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
+        type: "css/auto",
         use: [
-          "style-loader",
-          "css-loader",
           {
             loader: "postcss-loader",
             options: { postcssOptions: { plugins: [postcssCustomPlugin()] } },
@@ -1023,13 +1066,15 @@ const postcssCustomPlugin = (opts = {}) => ({
 });
 
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
+        type: "css/auto",
         use: [
-          "style-loader",
-          "css-loader",
           {
             loader: "postcss-loader",
             options: { postcssOptions: { plugins: [postcssCustomPlugin()] } },
@@ -1051,13 +1096,15 @@ module.exports = {
 const path = require("node:path");
 
 module.exports = {
+  experiments: {
+    css: true,
+  },
   module: {
     rules: [
       {
         test: /\.css$/i,
+        type: "css/auto",
         use: [
-          "style-loader",
-          "css-loader",
           {
             loader: "postcss-loader",
             options: {
