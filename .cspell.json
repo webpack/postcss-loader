@@ -24,6 +24,7 @@
     "package-lock.json",
     "node_modules",
     "coverage",
-    "*.log"
+    "*.log",
+    "src/options.check.js"
   ]
 }

@@ -2,6 +2,7 @@ import path from "node:path";
 
 import postcssPackage from "postcss/package.json";
 
+import check from "./options.check.js";
 import schema from "./options.json";
 import {
   exec,
@@ -31,7 +32,7 @@ let hasExplicitDependencyOnPostCSS = false;
  * @return {callback} callback Result
  */
 export default async function loader(content, sourceMap, meta) {
-  const options = this.getOptions(schema);
+  const options = this.getOptions(schema, check);
   const callback = this.async();
   const configOption =
     typeof options.postcssOptions === "undefined" ||
