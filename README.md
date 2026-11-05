@@ -64,8 +64,9 @@ Then add the loader to your `webpack` configuration. For example:
 
 > In the following configuration the plugin [`postcss-preset-env`](https://github.com/csstools/postcss-preset-env) is used, which is not installed by default.
 
-> The examples below use the [built-in CSS support](https://webpack.js.org/configuration/experiments/#experimentscss) of webpack (available in webpack `>= 5.87.0`), so no `css-loader` and `style-loader` are required.
-> If you prefer to handle CSS using [`css-loader`](https://github.com/webpack/css-loader) and [`style-loader`](https://github.com/webpack/style-loader), keep them in the list of loaders and use `postcss-loader` **before** them.
+> The examples below use the [built-in CSS support](https://webpack.js.org/configuration/experiments/#experimentscss) of webpack, the recommended way to handle CSS, so no `css-loader` and `style-loader` are required.
+> Keep `experiments.css: true` in these configs: a rule for `.css` files switches off the `"auto"` default that turns the built-in support on since webpack 5.109.0.
+> If you still handle CSS using the deprecated [`css-loader`](https://github.com/webpack/css-loader) and [`style-loader`](https://github.com/webpack/style-loader), keep them in the list of loaders and use `postcss-loader` **before** them — or follow the [Native CSS migration guide](https://webpack.js.org/guides/native-css/#migration-guide) to drop them.
 
 **file.js**
 
@@ -769,6 +770,10 @@ npm install --save-dev autoprefixer
 ```
 
 Automatically add vendor prefixes to CSS rules using [`autoprefixer`](https://github.com/postcss/autoprefixer).
+
+> [!NOTE]
+>
+> With the built-in CSS support, webpack's own CSS minimizer already adds and removes vendor prefixes for your browserslist targets in production (see [Vendor prefixes](https://webpack.js.org/guides/native-css/#vendor-prefixes)), so a PostCSS setup that only runs `autoprefixer` may not be needed at all.
 
 **webpack.config.js**
 
