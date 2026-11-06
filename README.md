@@ -64,9 +64,9 @@ Then add the loader to your `webpack` configuration. For example:
 
 > In the following configuration the plugin [`postcss-preset-env`](https://github.com/csstools/postcss-preset-env) is used, which is not installed by default.
 
-> The examples below use the [built-in CSS support](https://webpack.js.org/configuration/experiments/#experimentscss) of webpack, the recommended way to handle CSS, so no `css-loader` and `style-loader` are required.
+> The examples below use the [built-in CSS support](https://webpack.js.org/configuration/experiments/#experimentscss) of webpack, the recommended way to handle CSS (webpack 5.87.0 or later), so no `css-loader` and `style-loader` are required.
 > Keep `experiments.css: true` in these configs: a rule for `.css` files switches off the `"auto"` default that turns the built-in support on since webpack 5.109.0.
-> If you still handle CSS using the deprecated [`css-loader`](https://github.com/webpack/css-loader) and [`style-loader`](https://github.com/webpack/style-loader), keep them in the list of loaders and use `postcss-loader` **before** them — or follow the [Native CSS migration guide](https://webpack.js.org/guides/native-css/#migration-guide) to drop them.
+> If you still handle CSS using the deprecated [`css-loader`](https://github.com/webpack/css-loader) and [`style-loader`](https://github.com/webpack/style-loader), list `postcss-loader` last so it runs first, `use: ["style-loader", "css-loader", "postcss-loader"]`, and give that rule `type: "javascript/auto"` instead of `css/auto` — or follow the [Native CSS migration guide](https://webpack.js.org/guides/native-css/#migration-guide) to drop them.
 
 **file.js**
 
@@ -773,7 +773,7 @@ Automatically add vendor prefixes to CSS rules using [`autoprefixer`](https://gi
 
 > [!NOTE]
 >
-> With the built-in CSS support, webpack's own CSS minimizer already adds and removes vendor prefixes for your browserslist targets in production (see [Vendor prefixes](https://webpack.js.org/guides/native-css/#vendor-prefixes)), so a PostCSS setup that only runs `autoprefixer` may not be needed at all.
+> With the built-in CSS support, webpack's own CSS minimizer adds and removes vendor prefixes for a `browserslist` [target](https://webpack.js.org/configuration/target/) whenever it runs — `optimization.minimize`, on by default in `production` (see [Vendor prefixes](https://webpack.js.org/guides/native-css/#vendor-prefixes)). A PostCSS setup that only runs `autoprefixer` for such builds may not be needed at all. Keep `autoprefixer` for builds without minification that need prefixes, or for features the built-in prefixing does not cover, such as its `grid: "autoplace"` IE grid placement.
 
 **webpack.config.js**
 
@@ -963,7 +963,7 @@ export default {
 
 ### Extract CSS
 
-The built-in CSS support of webpack extracts CSS into separate files out of the box, no plugin is required.
+The built-in CSS support of webpack extracts CSS into separate files out of the box, no plugin is required. Its output is a `.css` file the page has to link: let webpack build the page — an [HTML entry or `output.html: true`](https://webpack.js.org/guides/native-html/) adds the `<link>` for you — or set [`exportType: "style"`](https://webpack.js.org/guides/native-css/#output-modes-exporttype) to inject the styles from JavaScript instead.
 Use [`output.cssFilename`](https://webpack.js.org/configuration/output/#outputcssfilename) and [`output.cssChunkFilename`](https://webpack.js.org/configuration/output/#outputcsschunkfilename) to control the names of the generated files.
 
 **webpack.config.js**

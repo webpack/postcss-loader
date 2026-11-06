@@ -13,7 +13,8 @@
     "hspace",
     "vspace",
     "commitlint",
-    "jiti"
+    "jiti",
+    "autoplace"
   ],
 
   "ignorePaths": [
