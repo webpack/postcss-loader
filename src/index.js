@@ -95,7 +95,11 @@ export default async function loader(content, sourceMap, meta) {
   }
 
   if (sourceMap && processOptions.map) {
-    processOptions.map.prev = normalizeSourceMap(sourceMap, this.context);
+    // Copy, as the config's map options are shared by all files of a compilation
+    processOptions.map = {
+      ...processOptions.map,
+      prev: normalizeSourceMap(sourceMap, this.context),
+    };
   }
 
   let root;
