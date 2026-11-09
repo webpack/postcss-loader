@@ -31,6 +31,10 @@ function exec(code, loaderContext) {
 
 let tsLoader;
 
+// One explorer per compilation, so all files share its search and load caches.
+// A new compilation (e.g. a watch rebuild) gets a new explorer.
+const explorers = new WeakMap();
+
 async function loadConfig(loaderContext, config, postcssOptions) {
   const searchPath =
     typeof config === "string"
@@ -154,11 +158,21 @@ async function loadConfig(loaderContext, config, postcssOptions) {
   loaders[".mts"] = tsLoader;
   loaders[".ts"] = tsLoader;
 
-  const explorer = cosmiconfig(moduleName, {
-    searchStrategy: "global",
-    searchPlaces,
-    loaders,
-  });
+  const compilation = loaderContext._compilation;
+
+  let explorer = compilation && explorers.get(compilation);
+
+  if (!explorer) {
+    explorer = cosmiconfig(moduleName, {
+      searchStrategy: "global",
+      searchPlaces,
+      loaders,
+    });
+
+    if (compilation) {
+      explorers.set(compilation, explorer);
+    }
+  }
 
   const result = await (stats.isFile()
     ? explorer.load(searchPath)
