@@ -1,6 +1,25 @@
 import path from "node:path";
 
+import { validate } from "schema-utils";
+
+import check from "../src/options.check";
+import schema from "../src/options.json";
+
 import { compile, getCompiler } from "./helpers/index";
+
+/**
+ * @param {object} options loader options
+ * @returns {boolean} whether the schema accepts them
+ */
+function isValid(options) {
+  try {
+    validate(schema, options);
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 describe("validate options", () => {
   const tests = {
@@ -70,6 +89,10 @@ describe("validate options", () => {
     it(`should ${
       type === "success" ? "successfully validate" : "throw an error on"
     } the "${key}" option with "${stringifyValue(value)}" value`, async () => {
+      // webpack trusts a check that passes and skips the schema, so the two
+      // must agree on every value
+      expect(check({ [key]: value })).toBe(isValid({ [key]: value }));
+
       let compiler;
 
       if (

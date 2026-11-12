@@ -4,3 +4,4 @@
 /test/fixtures
 CHANGELOG.md
 docs/LOADER.md
+/src/options.check.js
