@@ -130,6 +130,10 @@ describe("compilation cache", () => {
     expect(cache.delete(context, ["key"])).toBe(true);
     expect(cache.delete(context, ["key"])).toBe(false);
     expect(cache.delete(context, ["other", "key"])).toBe(false);
+    // Only primitive keys are stored, so there is no store for object keys
+    expect(cache.delete(context, [{}])).toBe(false);
+    // A compilation without values
+    expect(cache.has({ _compilation: {} }, ["key"])).toBe(false);
     expect(cache.get(context, ["key"], factory)).not.toBe(value);
   });
 });
