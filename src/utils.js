@@ -202,7 +202,19 @@ async function loadConfig(loaderContext, config, postcssOptions) {
       options: postcssOptions || {},
     };
 
-    return { ...result, config: result.config(api) };
+    const config = result.config(api);
+
+    return {
+      ...result,
+      // Copy, as the loader reads the config after async work, and in the
+      // meantime the function can be called for other files of the
+      // compilation, which can change and return the same object
+      config:
+        config && typeof config === "object" && !Array.isArray(config)
+          ? { ...config }
+          : config,
+      isFunction: true,
+    };
   }
 
   return result;
@@ -333,8 +345,9 @@ const NO_OPTIONS = {};
 
 // The plugins depend only on the config object and the loader options, so
 // files with the same config and options share them within a compilation.
-// A function config or function `postcssOptions` returns a new object for
-// every file, so their plugins are still created for every file.
+// A function config or function `postcssOptions` is called for every file and
+// can return the same object with other plugins, so their plugins are not
+// cached and are still created for every file.
 const pluginsCache = createCompilationCache();
 
 async function getPostcssOptions(
@@ -350,14 +363,20 @@ async function getPostcssOptions(
     normalizedPostcssOptions = normalizedPostcssOptions(loaderContext);
   }
 
+  const createPlugins = () =>
+    resolvePlugins(loadedConfig.config, normalizedPostcssOptions, file);
+
   let plugins = [];
 
   try {
-    plugins = pluginsCache.get(
-      loaderContext,
-      [loadedConfig.config || NO_CONFIG, normalizedPostcssOptions],
-      () => resolvePlugins(loadedConfig.config, normalizedPostcssOptions, file),
-    );
+    plugins =
+      loadedConfig.isFunction || typeof postcssOptions === "function"
+        ? createPlugins()
+        : pluginsCache.get(
+            loaderContext,
+            [loadedConfig.config || NO_CONFIG, normalizedPostcssOptions],
+            createPlugins,
+          );
   } catch (error) {
     loaderContext.emitError(error);
   }

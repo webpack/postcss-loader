@@ -340,6 +340,61 @@ module.exports = {
     expect(getErrors(stats)).toEqual([]);
   });
 
+  it("should use the plugins of a function config that returns the same object", async () => {
+    const count = 5;
+    const directory = createProject({
+      ...getCssFiles(count),
+      "postcss.config.js": `const path = require("path");
+const config = {};
+
+module.exports = (api) => {
+  config.plugins = [
+    [${JSON.stringify(countingPluginPath)}, { label: path.basename(api.file) }],
+  ];
+
+  return config;
+};
+`,
+    });
+    const stats = await compile(getProjectCompiler(directory));
+    const css = getCss(stats, count);
+
+    for (let i = 0; i < count; i++) {
+      expect(css[i]).toContain(`counting: file-${i}.css`);
+    }
+
+    expect(globalThis.configCachePluginCount).toBe(count);
+    expect(getErrors(stats)).toEqual([]);
+  });
+
+  it("should use the plugins of function loader options that return the same object", async () => {
+    const count = 5;
+    const directory = createProject(getCssFiles(count));
+    const postcssOptions = { config: false };
+    const stats = await compile(
+      getProjectCompiler(directory, {
+        postcssOptions: (loaderContext) => {
+          postcssOptions.plugins = [
+            [
+              countingPluginPath,
+              { label: path.basename(loaderContext.resourcePath) },
+            ],
+          ];
+
+          return postcssOptions;
+        },
+      }),
+    );
+    const css = getCss(stats, count);
+
+    for (let i = 0; i < count; i++) {
+      expect(css[i]).toContain(`counting: file-${i}.css`);
+    }
+
+    expect(globalThis.configCachePluginCount).toBe(count);
+    expect(getErrors(stats)).toEqual([]);
+  });
+
   it("should create one processor per compilation for the same plugins", async () => {
     const count = 5;
     const directory = createProject({
