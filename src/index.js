@@ -2,6 +2,7 @@ import path from "node:path";
 
 import postcssPackage from "postcss/package.json";
 
+import { createCompilationCache } from "./compilation-cache";
 import check from "./options.check.js";
 import schema from "./options.json";
 import {
@@ -17,6 +18,9 @@ import {
 } from "./utils";
 
 let hasExplicitDependencyOnPostCSS = false;
+
+// A processor only holds its plugins, so files with the same plugins share it
+const processorCache = createCompilationCache();
 
 /**
  * **PostCSS Loader**
@@ -123,7 +127,9 @@ export default async function loader(content, sourceMap, meta) {
   let processor;
 
   try {
-    processor = implementation(plugins);
+    processor = processorCache.get(this, [implementation, plugins], () =>
+      implementation(plugins),
+    );
     result = await processor.process(root || content, processOptions);
   } catch (error) {
     // Check postcss versions to avoid using PostCSS 7.

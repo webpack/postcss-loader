@@ -4,6 +4,8 @@ import url from "node:url";
 
 import { cosmiconfig, defaultLoadersSync } from "cosmiconfig";
 
+import { createCompilationCache } from "./compilation-cache";
+
 const parentModule = module;
 
 const stat = (inputFileSystem, filePath) =>
@@ -31,25 +33,10 @@ function exec(code, loaderContext) {
 
 let tsLoader;
 
-// One explorer per compilation, so all files share its search and load caches.
-// A new compilation (e.g. a watch rebuild) gets a new explorer.
-const explorers = new WeakMap();
+const MODULE_NAME = "postcss";
 
-async function loadConfig(loaderContext, config, postcssOptions) {
-  const searchPath =
-    typeof config === "string"
-      ? path.resolve(config)
-      : path.dirname(loaderContext.resourcePath);
-
-  let stats;
-
-  try {
-    stats = await stat(loaderContext.fs, searchPath);
-  } catch {
-    throw new Error(`No PostCSS config found in: ${searchPath}`);
-  }
-
-  const moduleName = "postcss";
+function createExplorer() {
+  const moduleName = MODULE_NAME;
   const searchPlaces = [
     // Prefer popular format
     "package.json",
@@ -158,21 +145,36 @@ async function loadConfig(loaderContext, config, postcssOptions) {
   loaders[".mts"] = tsLoader;
   loaders[".ts"] = tsLoader;
 
-  const compilation = loaderContext._compilation;
+  return cosmiconfig(moduleName, {
+    searchStrategy: "global",
+    searchPlaces,
+    loaders,
+  });
+}
 
-  let explorer = compilation && explorers.get(compilation);
+// One explorer per compilation, so all files share its search and load caches.
+// A new compilation (e.g. a watch rebuild) gets a new explorer.
+const explorerCache = createCompilationCache();
 
-  if (!explorer) {
-    explorer = cosmiconfig(moduleName, {
-      searchStrategy: "global",
-      searchPlaces,
-      loaders,
-    });
+async function loadConfig(loaderContext, config, postcssOptions) {
+  const searchPath =
+    typeof config === "string"
+      ? path.resolve(config)
+      : path.dirname(loaderContext.resourcePath);
 
-    if (compilation) {
-      explorers.set(compilation, explorer);
-    }
+  let stats;
+
+  try {
+    stats = await stat(loaderContext.fs, searchPath);
+  } catch {
+    throw new Error(`No PostCSS config found in: ${searchPath}`);
   }
+
+  const explorer = explorerCache.get(
+    loaderContext,
+    [MODULE_NAME],
+    createExplorer,
+  );
 
   const result = await (stats.isFile()
     ? explorer.load(searchPath)
@@ -305,10 +307,40 @@ async function tryRequireThenImport(module) {
   }
 }
 
+function resolvePlugins(config, postcssOptions, file) {
+  const factory = pluginFactory();
+
+  if (config && config.plugins) {
+    factory(config.plugins);
+  }
+
+  factory(postcssOptions.plugins);
+
+  return [...factory()].map((item) => {
+    const [plugin, options] = item;
+
+    if (typeof plugin === "string") {
+      return loadPlugin(plugin, options, file);
+    }
+
+    return plugin;
+  });
+}
+
+// Keys for a missing config or missing loader options
+const NO_CONFIG = {};
+const NO_OPTIONS = {};
+
+// The plugins depend only on the config object and the loader options, so
+// files with the same config and options share them within a compilation.
+// A function config or function `postcssOptions` returns a new object for
+// every file, so their plugins are still created for every file.
+const pluginsCache = createCompilationCache();
+
 async function getPostcssOptions(
   loaderContext,
   loadedConfig = {},
-  postcssOptions = {},
+  postcssOptions = NO_OPTIONS,
 ) {
   const file = loaderContext.resourcePath;
 
@@ -321,23 +353,11 @@ async function getPostcssOptions(
   let plugins = [];
 
   try {
-    const factory = pluginFactory();
-
-    if (loadedConfig.config && loadedConfig.config.plugins) {
-      factory(loadedConfig.config.plugins);
-    }
-
-    factory(normalizedPostcssOptions.plugins);
-
-    plugins = [...factory()].map((item) => {
-      const [plugin, options] = item;
-
-      if (typeof plugin === "string") {
-        return loadPlugin(plugin, options, file);
-      }
-
-      return plugin;
-    });
+    plugins = pluginsCache.get(
+      loaderContext,
+      [loadedConfig.config || NO_CONFIG, normalizedPostcssOptions],
+      () => resolvePlugins(loadedConfig.config, normalizedPostcssOptions, file),
+    );
   } catch (error) {
     loaderContext.emitError(error);
   }
