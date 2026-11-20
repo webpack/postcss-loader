@@ -4,6 +4,8 @@ import url from "node:url";
 
 import { cosmiconfig, defaultLoadersSync } from "cosmiconfig";
 
+import { createCompilationCache } from "./compilation-cache";
+
 const parentModule = module;
 
 const stat = (inputFileSystem, filePath) =>
@@ -31,21 +33,10 @@ function exec(code, loaderContext) {
 
 let tsLoader;
 
-async function loadConfig(loaderContext, config, postcssOptions) {
-  const searchPath =
-    typeof config === "string"
-      ? path.resolve(config)
-      : path.dirname(loaderContext.resourcePath);
+const MODULE_NAME = "postcss";
 
-  let stats;
-
-  try {
-    stats = await stat(loaderContext.fs, searchPath);
-  } catch {
-    throw new Error(`No PostCSS config found in: ${searchPath}`);
-  }
-
-  const moduleName = "postcss";
+function createExplorer() {
+  const moduleName = MODULE_NAME;
   const searchPlaces = [
     // Prefer popular format
     "package.json",
@@ -154,11 +145,36 @@ async function loadConfig(loaderContext, config, postcssOptions) {
   loaders[".mts"] = tsLoader;
   loaders[".ts"] = tsLoader;
 
-  const explorer = cosmiconfig(moduleName, {
+  return cosmiconfig(moduleName, {
     searchStrategy: "global",
     searchPlaces,
     loaders,
   });
+}
+
+// One explorer per compilation, so all files share its search and load caches.
+// A new compilation (e.g. a watch rebuild) gets a new explorer.
+const explorerCache = createCompilationCache();
+
+async function loadConfig(loaderContext, config, postcssOptions) {
+  const searchPath =
+    typeof config === "string"
+      ? path.resolve(config)
+      : path.dirname(loaderContext.resourcePath);
+
+  let stats;
+
+  try {
+    stats = await stat(loaderContext.fs, searchPath);
+  } catch {
+    throw new Error(`No PostCSS config found in: ${searchPath}`);
+  }
+
+  const explorer = explorerCache.get(
+    loaderContext,
+    [MODULE_NAME],
+    createExplorer,
+  );
 
   const result = await (stats.isFile()
     ? explorer.load(searchPath)
@@ -186,7 +202,19 @@ async function loadConfig(loaderContext, config, postcssOptions) {
       options: postcssOptions || {},
     };
 
-    return { ...result, config: result.config(api) };
+    const config = result.config(api);
+
+    return {
+      ...result,
+      // Copy, as the loader reads the config after async work, and in the
+      // meantime the function can be called for other files of the
+      // compilation, which can change and return the same object
+      config:
+        config && typeof config === "object" && !Array.isArray(config)
+          ? { ...config }
+          : config,
+      isFunction: true,
+    };
   }
 
   return result;
@@ -291,10 +319,41 @@ async function tryRequireThenImport(module) {
   }
 }
 
+function resolvePlugins(config, postcssOptions, file) {
+  const factory = pluginFactory();
+
+  if (config && config.plugins) {
+    factory(config.plugins);
+  }
+
+  factory(postcssOptions.plugins);
+
+  return [...factory()].map((item) => {
+    const [plugin, options] = item;
+
+    if (typeof plugin === "string") {
+      return loadPlugin(plugin, options, file);
+    }
+
+    return plugin;
+  });
+}
+
+// Keys for a missing config or missing loader options
+const NO_CONFIG = {};
+const NO_OPTIONS = {};
+
+// The plugins depend only on the config object and the loader options, so
+// files with the same config and options share them within a compilation.
+// A function config or function `postcssOptions` is called for every file and
+// can return the same object with other plugins, so their plugins are not
+// cached and are still created for every file.
+const pluginsCache = createCompilationCache();
+
 async function getPostcssOptions(
   loaderContext,
   loadedConfig = {},
-  postcssOptions = {},
+  postcssOptions = NO_OPTIONS,
 ) {
   const file = loaderContext.resourcePath;
 
@@ -304,26 +363,20 @@ async function getPostcssOptions(
     normalizedPostcssOptions = normalizedPostcssOptions(loaderContext);
   }
 
+  const createPlugins = () =>
+    resolvePlugins(loadedConfig.config, normalizedPostcssOptions, file);
+
   let plugins = [];
 
   try {
-    const factory = pluginFactory();
-
-    if (loadedConfig.config && loadedConfig.config.plugins) {
-      factory(loadedConfig.config.plugins);
-    }
-
-    factory(normalizedPostcssOptions.plugins);
-
-    plugins = [...factory()].map((item) => {
-      const [plugin, options] = item;
-
-      if (typeof plugin === "string") {
-        return loadPlugin(plugin, options, file);
-      }
-
-      return plugin;
-    });
+    plugins =
+      loadedConfig.isFunction || typeof postcssOptions === "function"
+        ? createPlugins()
+        : pluginsCache.get(
+            loaderContext,
+            [loadedConfig.config || NO_CONFIG, normalizedPostcssOptions],
+            createPlugins,
+          );
   } catch (error) {
     loaderContext.emitError(error);
   }
